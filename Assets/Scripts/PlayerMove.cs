@@ -9,6 +9,7 @@ public class PlayerMove : MonoBehaviour
 {
     public float Speed;
     public float jump;
+    private float lastHorizontalInput = 0;
 
     public GameManager manager;
     public UIControl UI;
@@ -45,16 +46,17 @@ public class PlayerMove : MonoBehaviour
         {
             if (isGrounded)
             {
-                rigid.velocity = new Vector2(rigid.velocity.x, 0);
-                rigid.AddForce(Vector2.up * jump, ForceMode2D.Impulse);
-                anim.SetBool("isJump", true);
+                rigid.velocity = new Vector2(rigid.velocity.x, jump);
+                // rigid.velocity = new Vector2(rigid.velocity.x, 0);
+                // rigid.AddForce(Vector2.up * jump, ForceMode2D.Impulse);
                 canDoubleJump = true;
                 JumpSound();
             }
-            else if (canDoubleJump)
+            else if (!isGrounded && canDoubleJump)
             {
-                rigid.velocity = new Vector2(rigid.velocity.x, 0);
-                rigid.AddForce(Vector2.up * jump, ForceMode2D.Impulse);
+                rigid.velocity = new Vector2(rigid.velocity.x, jump);
+                // rigid.velocity = new Vector2(rigid.velocity.x, 0);
+                // rigid.AddForce(Vector2.up * jump, ForceMode2D.Impulse);
                 anim.SetBool("isJump", true);
                 canDoubleJump = false;
                 JumpSound();
@@ -66,8 +68,14 @@ public class PlayerMove : MonoBehaviour
             rigid.velocity = new Vector2(rigid.velocity.normalized.x * 0.5f, rigid.velocity.y);
 
         // 방향 전환
-        if (Input.GetButtonDown("Horizontal"))
-            spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == -1;
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
+
+        if (horizontalInput != lastHorizontalInput)
+            spriteRenderer.flipX = horizontalInput == -1;
+        lastHorizontalInput = horizontalInput;
+
+        // if (Input.GetButtonDown("Horizontal"))
+            // spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == -1;
 
         // 0.3이 무엇을 가리키는지 알 수 없음 > 따로 변수를 만들거나 알기 쉽게 만들 수 있다
         if (Mathf.Abs(rigid.velocity.x) < 0.3)
